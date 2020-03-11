@@ -1,50 +1,45 @@
 import React, { useState } from 'react';
 import './App.css';
 import BancoDeDados from './db/BancoDeDados';
+import Pedido from './entidades/Pedido';
+import StatusPedido from './entidades/StatusPedido';
+import Cardapio from './componentes/Cardapio';
+import CarrinhoDeCompras from './componentes/CarrinhoDeCompras';
 
 function App() {
   const [pedidos, setPedidos] = useState([]);
 
   const pedir = (produto) => {
-    setPedidos([...pedidos, produto]);
+    // converte produto em pedido - define o status do pedido como 'na fila'
+    let pedido = new Pedido(produto.nome, produto.valor, produto.tipo, produto.foto, StatusPedido.NA_FILA);
+    setPedidos([...pedidos, pedido]);
   };
 
-  const calculaTotal = () => {
-    let total = 0.0;
-    pedidos.forEach(p => total += p.valor);
-    return total;
+  const cancelarPedido = (indice) => {
+    setPedidos([...pedidos.slice(0, indice), ...pedidos.slice(indice + 1)]);
   };
 
-  const renderProduto = (produto) => {
-    return (
-      <tr>
-        <td><img src={produto.foto}/></td>
-        <td>{produto.nome}</td>
-        <td>{produto.tipo}</td>
-        <td>R$ {produto.valor.toFixed(2)}</td>
-        <td><a href="#" class="myButton" onClick={() => pedir(produto)}>Pedir</a></td>
-      </tr>
-    );
-  };
+  // Gambiarra para simular o funcionamento do restaurante
+  const progrideStatus = () => {
+    let novosPedidos = [...pedidos];
+    novosPedidos.forEach(p => {
+      if (p.status == StatusPedido.NA_FILA) {
+        p.status = StatusPedido.PREPARANDO;
+      } else if (p.status == StatusPedido.PREPARANDO) {
+        p.status = StatusPedido.SAIU_PARA_ENTREGA;
+      } else if (p.status == StatusPedido.SAIU_PARA_ENTREGA) {
+        p.status = StatusPedido.ENTREGUE;
+      }  
+    });
+    setPedidos(novosPedidos);
+  };  
 
   return (
-    <div className="table-cardapio">
-      <div className="header">Cardápio - 💰 R$ {calculaTotal().toFixed(2)}</div>
-      <table cellspacing="0">
-        <thead>
-          <tr>
-            <th>Foto</th>
-            <th>Nome</th>
-            <th>Tipo</th>
-            <th>Preço</th>
-            <th>Pedir</th>
-          </tr>
-        </thead>
-        <tbody>
-          {BancoDeDados.getProdutos().map(renderProduto)}
-        </tbody>
-      </table>
-    </div>
+    <>
+      <button onClick={progrideStatus}>Progride o Status</button>
+      <CarrinhoDeCompras pedidos={pedidos} onCancelar={cancelarPedido}/>
+      <Cardapio produtos={BancoDeDados.getProdutos()} onPedir={pedir}/>
+    </>
   );
 }
 
