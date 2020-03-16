@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
-import BancoDeDados from './db/BancoDeDados';
 import Pedido from './entidades/Pedido';
 import StatusPedido from './entidades/StatusPedido';
 import Cardapio from './componentes/Cardapio';
 import CarrinhoDeCompras from './componentes/CarrinhoDeCompras';
+import { ajax } from 'rxjs/ajax';
+import { map } from 'rxjs/operators';
 
 function App() {
+  const [produtos, setProdutos] = useState([]);
   const [pedidos, setPedidos] = useState([]);
 
   const pedir = (produto) => {
@@ -19,28 +21,34 @@ function App() {
     setPedidos([...pedidos.slice(0, indice), ...pedidos.slice(indice + 1)]);
   };
 
+  useEffect(() => {
+    ajax('http://localhost:5000/produtos').pipe(
+      map(ajaxResponse => ajaxResponse.response)
+    ).subscribe(produtosDoBackend => setProdutos(produtosDoBackend));
+  });
+
   // Gambiarra para simular o funcionamento do restaurante
   const progrideStatus = () => {
     let novosPedidos = [...pedidos];
     novosPedidos.forEach(p => {
-      if (p.status == StatusPedido.NA_FILA) {
+      if (p.status === StatusPedido.NA_FILA) {
         p.status = StatusPedido.PREPARANDO;
-      } else if (p.status == StatusPedido.PREPARANDO) {
+      } else if (p.status === StatusPedido.PREPARANDO) {
         p.status = StatusPedido.SAIU_PARA_ENTREGA;
-      } else if (p.status == StatusPedido.SAIU_PARA_ENTREGA) {
+      } else if (p.status === StatusPedido.SAIU_PARA_ENTREGA) {
         p.status = StatusPedido.ENTREGUE;
       }  
     });
     setPedidos(novosPedidos);
-  };  
+  };
 
   return (
     <>
       <button onClick={progrideStatus}>Progride o Status</button>
       <CarrinhoDeCompras pedidos={pedidos} onCancelar={cancelarPedido}/>
-      <Cardapio produtos={BancoDeDados.getProdutos()} onPedir={pedir}/>
+      <Cardapio produtos={produtos} onPedir={pedir}/>
     </>
-  );
+  );  
 }
 
 export default App;

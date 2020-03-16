@@ -13,7 +13,7 @@ function CarrinhoDeCompras({pedidos, onCancelar}) {
 
   const renderPedido = (pedido, indice) => {
     return (
-      <tr>
+      <tr key={"pedido_" + indice}>
         <td><img src={pedido.foto}/></td>
         <td>{pedido.nome}</td>
         <td>{pedido.tipo}</td>
@@ -42,7 +42,7 @@ function CarrinhoDeCompras({pedidos, onCancelar}) {
           {escondido ? "🡣" : "🡡"}
         </span>
       </div>
-      <table cellspacing="0" className={escondido ? "escondido" : ""}>
+      <table cellSpacing="0" className={escondido ? "escondido" : ""}>
         <thead>
           <tr>
             <th>Foto</th>

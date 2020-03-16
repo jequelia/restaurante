@@ -4,12 +4,12 @@ import '../App.css';
 function Cardapio({produtos, onPedir}) {
   const renderProduto = (produto) => {
     return (
-      <tr>
+      <tr key={"produto_" + produto._id}>
         <td><img src={produto.foto}/></td>
         <td>{produto.nome}</td>
         <td>{produto.tipo}</td>
         <td>R$ {produto.valor.toFixed(2)}</td>
-        <td><a href="#" class="myButton" onClick={() => onPedir(produto)}>Pedir</a></td>
+        <td><a href="#" className="myButton" onClick={() => onPedir(produto)}>Pedir</a></td>
       </tr>
     );
   };
@@ -17,7 +17,7 @@ function Cardapio({produtos, onPedir}) {
   return (
     <div className="table-cardapio">
       <div className="header">Cardápio</div>
-      <table cellspacing="0">
+      <table cellSpacing="0">
         <thead>
           <tr>
             <th>Foto</th>
