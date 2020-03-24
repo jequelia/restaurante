@@ -6,6 +6,7 @@ import Cardapio from './componentes/Cardapio';
 import CarrinhoDeCompras from './componentes/CarrinhoDeCompras';
 import { ajax } from 'rxjs/ajax';
 import { map } from 'rxjs/operators';
+import socketIOClient from "socket.io-client";
 
 function App() {
   const [produtos, setProdutos] = useState([]);
@@ -25,10 +26,19 @@ function App() {
     ajax('http://localhost:5000/produtos').pipe(
       map(ajaxResponse => ajaxResponse.response)
     ).subscribe(produtosDoBackend => setProdutos(produtosDoBackend));
-  });
+  }, []);
+
+  useEffect(() => {
+    const socket = socketIOClient('http://localhost:5000');
+    socket.on('cozinha', msg => {
+      progrideStatus();
+    });
+  }, []);
 
   // Gambiarra para simular o funcionamento do restaurante
   const progrideStatus = () => {
+    console.log('pedidos antes');
+    console.log(pedidos);
     let novosPedidos = [...pedidos];
     novosPedidos.forEach(p => {
       if (p.status === StatusPedido.NA_FILA) {
@@ -39,6 +49,8 @@ function App() {
         p.status = StatusPedido.ENTREGUE;
       }  
     });
+    console.log('novos pedidos');
+    console.log(novosPedidos);
     setPedidos(novosPedidos);
   };
 
