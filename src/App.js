@@ -28,13 +28,13 @@ function App() {
     ).subscribe(produtosDoBackend => setProdutos(produtosDoBackend));
   }, []);
 
-  useEffect(() => {
+ useEffect(() => {
     const socket = socketIOClient('http://localhost:5000');
     socket.on('cozinha', msg => {
       progrideStatus();
-    });
+    },
+    socket.on('disconnect', progrideStatus()));
   }, []);
-
   // Gambiarra para simular o funcionamento do restaurante
   const progrideStatus = () => {
     console.log('pedidos antes');
@@ -48,10 +48,11 @@ function App() {
       } else if (p.status === StatusPedido.SAIU_PARA_ENTREGA) {
         p.status = StatusPedido.ENTREGUE;
       }  
+      setPedidos(novosPedidos);
+
     });
     console.log('novos pedidos');
     console.log(novosPedidos);
-    setPedidos(novosPedidos);
   };
 
   return (
